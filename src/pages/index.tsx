@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import siteConfig from '@/websiteconfig.json';
 import Link from 'next/link';
 import Head from 'next/head';
@@ -14,6 +14,19 @@ const HERO_LINES = [
 function HomePage() {
   const [textRevealed, setTextRevealed] = useState(false);
   const handleRevealComplete = useCallback(() => setTextRevealed(true), []);
+
+  const wdoRef = useRef<HTMLElement>(null);
+  const [rocketFired, setRocketFired] = useState(false);
+  useEffect(() => {
+    const el = wdoRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setRocketFired(true); observer.disconnect(); } },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <>
@@ -44,10 +57,10 @@ function HomePage() {
           <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight mb-4 leading-tight">
             Diving Deeper<br />Into Innovation
           </h1>
-          <p className={`text-lg md:text-xl text-white/80 mb-8 max-w-xl leading-relaxed transition-all duration-700 delay-100 ${textRevealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <p className="text-lg md:text-xl text-white/80 mb-8 max-w-xl leading-relaxed">
             University of Ottawa&apos;s student-led underwater robotics team, competing on the world stage since 2022.
           </p>
-          <div className={`flex flex-col sm:flex-row gap-4 transition-all duration-700 delay-200 ${textRevealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div className="flex flex-col sm:flex-row gap-4">
             <Link
               href="/team"
               className="px-8 py-3 rounded-full font-semibold text-white transition-all hover:shadow-lg hover:scale-105"
@@ -137,7 +150,7 @@ function HomePage() {
       </section>
 
       {/* What We Do */}
-      <section className="py-28 px-4 relative overflow-hidden" style={{ backgroundColor: '#f8fffe' }}>
+      <section ref={wdoRef} className="py-28 px-4 relative overflow-hidden" style={{ backgroundColor: '#f8fffe' }}>
         {/* Seaweed - right */}
         <svg className="absolute bottom-0 right-8 opacity-20" width="60" height="200" viewBox="0 0 60 200" fill="none">
           <path d="M20 200 C14 175, 28 160, 18 135 C8 110, 24 95, 16 70 C8 45, 22 25, 18 0" stroke="#187A72" strokeWidth="3" fill="none" strokeLinecap="round" />
@@ -186,25 +199,136 @@ function HomePage() {
               {
                 icon: (
                   <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                    <rect x="8" y="18" width="32" height="18" rx="4" stroke="#187A72" strokeWidth="2" />
-                    <rect x="14" y="10" width="20" height="7" rx="3" stroke="#187A72" strokeWidth="2" />
-                    <circle cx="18" cy="27" r="3" stroke="#00A99D" strokeWidth="2" />
-                    <rect x="4" y="21" width="5" height="5" rx="1" stroke="#00A99D" strokeWidth="1.5" />
-                    <rect x="39" y="21" width="5" height="5" rx="1" stroke="#00A99D" strokeWidth="1.5" />
-                    <path d="M24 36 L24 42 L20 46 M24 42 L28 46" stroke="#187A72" strokeWidth="2" strokeLinecap="round" />
+                    {/* === 3D ISOMETRIC ROV BODY === */}
+                    {/* Right face — darkest (shadow) */}
+                    <path d="M31 22 L41 16 L41 29 L31 35 Z" fill="#0a3d38" />
+                    {/* Front face — medium */}
+                    <path d="M5 22 L31 22 L31 35 L5 35 Z" fill="#187A72" />
+                    {/* Top face — lightest */}
+                    <path d="M5 22 L15 16 L41 16 L31 22 Z" fill="#1a9e93" />
+                    {/* Edge highlight on top */}
+                    <path d="M5 22 L15 16 L41 16" stroke="white" strokeWidth="0.5" opacity="0.2" fill="none" />
+                    {/* Panel lines front */}
+                    <line x1="5" y1="27" x2="31" y2="27" stroke="white" strokeWidth="0.4" opacity="0.1" />
+                    <line x1="5" y1="31" x2="31" y2="31" stroke="white" strokeWidth="0.4" opacity="0.1" />
+                    <line x1="19" y1="22" x2="19" y2="35" stroke="white" strokeWidth="0.4" opacity="0.1" />
+                    {/* Panel lines right face */}
+                    <line x1="31" y1="28" x2="41" y2="23" stroke="white" strokeWidth="0.4" opacity="0.08" />
+
+                    {/* === CAMERA (front-left) === */}
+                    <circle cx="7" cy="28.5" r="3.8" fill="#061f1c" />
+                    <circle cx="7" cy="28.5" r="2.3" fill="#1a7570" />
+                    <circle cx="6.2" cy="27.7" r="0.9" fill="white" fillOpacity="0.45" />
+                    <circle cx="7" cy="28.5" r="3.8" stroke="#0d5c55" strokeWidth="0.5" fill="none" />
+
+                    {/* === LEDs === */}
+                    <circle cx="5.5" cy="23.5" r="1.3" fill="#00A99D">
+                      <animate attributeName="opacity" values="1;0.25;1" dur="1.8s" repeatCount="indefinite" />
+                    </circle>
+                    <circle cx="6" cy="23.5" r="0.5" fill="white" fillOpacity="0.6" />
+                    <circle cx="5.5" cy="33.5" r="1.3" fill="#00A99D">
+                      <animate attributeName="opacity" values="1;0.25;1" dur="1.8s" begin="0.9s" repeatCount="indefinite" />
+                    </circle>
+                    <circle cx="6" cy="33.5" r="0.5" fill="white" fillOpacity="0.6" />
+
+                    {/* === LEFT VERTICAL THRUSTER === */}
+                    <rect x="10.5" y="10" width="3" height="7" rx="0.5" fill="#0d4d47" />
+                    <ellipse cx="12" cy="10" rx="5.5" ry="2" fill="#0a3d38" stroke="#187A72" strokeWidth="0.75" />
+                    <g>
+                      <animateTransform attributeName="transform" type="rotate" from="0 12 10" to="360 12 10" dur="0.7s" repeatCount="indefinite" />
+                      <line x1="6.5" y1="10" x2="17.5" y2="10" stroke="#1a8a82" strokeWidth="1.2" />
+                      <line x1="12" y1="7.5" x2="12" y2="12.5" stroke="#1a8a82" strokeWidth="1.2" />
+                      <line x1="8.5" y1="7" x2="15.5" y2="13" stroke="#1a8a82" strokeWidth="0.65" opacity="0.5" />
+                      <line x1="15.5" y1="7" x2="8.5" y2="13" stroke="#1a8a82" strokeWidth="0.65" opacity="0.5" />
+                    </g>
+                    <circle cx="12" cy="10" r="1.5" fill="#187A72" />
+
+                    {/* === RIGHT VERTICAL THRUSTER === */}
+                    <rect x="27" y="7" width="3" height="10" rx="0.5" fill="#0d4d47" />
+                    <ellipse cx="28.5" cy="7" rx="5.5" ry="2" fill="#0a3d38" stroke="#187A72" strokeWidth="0.75" />
+                    <g>
+                      <animateTransform attributeName="transform" type="rotate" from="0 28.5 7" to="360 28.5 7" dur="0.6s" repeatCount="indefinite" />
+                      <line x1="23" y1="7" x2="34" y2="7" stroke="#1a8a82" strokeWidth="1.2" />
+                      <line x1="28.5" y1="4.5" x2="28.5" y2="9.5" stroke="#1a8a82" strokeWidth="1.2" />
+                      <line x1="25" y1="4" x2="32" y2="10" stroke="#1a8a82" strokeWidth="0.65" opacity="0.5" />
+                      <line x1="32" y1="4" x2="25" y2="10" stroke="#1a8a82" strokeWidth="0.65" opacity="0.5" />
+                    </g>
+                    <circle cx="28.5" cy="7" r="1.5" fill="#187A72" />
+
+                    {/* === SIDE THRUSTER (right face) === */}
+                    <line x1="37" y1="21" x2="44" y2="21" stroke="#0d4d47" strokeWidth="1.3" />
+                    <ellipse cx="44" cy="21" rx="1.5" ry="4" fill="#0a3d38" stroke="#187A72" strokeWidth="0.75" />
+                    <g>
+                      <animateTransform attributeName="transform" type="rotate" from="0 44 21" to="360 44 21" dur="0.85s" repeatCount="indefinite" />
+                      <line x1="44" y1="17" x2="44" y2="25" stroke="#1a8a82" strokeWidth="1.1" />
+                      <line x1="42" y1="21" x2="46" y2="21" stroke="#1a8a82" strokeWidth="0.9" />
+                    </g>
+                    <circle cx="44" cy="21" r="1.2" fill="#187A72" />
+
+
+                    {/* === TETHER === */}
+                    <path d="M35 16 C38 13 40 10 43 8" stroke="#00A99D" strokeWidth="0.9" strokeLinecap="round" strokeDasharray="2 1.5" opacity="0.55" />
+
+                    {/* === MANIPULATOR ARM === */}
+                    <path d="M8 35 L6 41 M6 38.5 L4 41 M6 38.5 L8 41" stroke="#00A99D" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 ),
                 title: 'Design & Build',
-                description: 'We engineer custom ROVs from the ground up — designing hull structures, thruster systems, onboard electronics, and control software as a fully integrated team.',
+                description: 'We engineer custom ROVs from the ground up, designing hull structures, thruster systems, onboard electronics, and control software as a fully integrated team.',
               },
               {
                 icon: (
                   <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                    <circle cx="24" cy="24" r="18" stroke="#187A72" strokeWidth="2" />
-                    <path d="M24 6 C24 6, 30 14, 30 24 C30 34, 24 42, 24 42 C24 42, 18 34, 18 24 C18 14, 24 6, 24 6Z" stroke="#00A99D" strokeWidth="2" fill="none" />
-                    <line x1="6" y1="24" x2="42" y2="24" stroke="#187A72" strokeWidth="2" />
-                    <path d="M10 15 Q24 20 38 15" stroke="#187A72" strokeWidth="1.5" fill="none" />
-                    <path d="M10 33 Q24 28 38 33" stroke="#187A72" strokeWidth="1.5" fill="none" />
+                    <defs>
+                      <clipPath id="trophyCupClip">
+                        <path d="M14 8 H34 V23 C34 31 14 31 14 23 Z" />
+                      </clipPath>
+                    </defs>
+
+                    {/* Sparkles around trophy */}
+                    <g>
+                      <animate attributeName="opacity" values="0;1;0" dur="1.6s" repeatCount="indefinite" begin="0s" />
+                      <path d="M39 7 L39.8 5 L40.6 7 L42.6 7.8 L40.6 8.6 L39.8 10.6 L39 8.6 L37 7.8 Z" fill="#00A99D" fillOpacity="0.8" />
+                    </g>
+                    <g>
+                      <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" begin="0.6s" />
+                      <path d="M8 12 L8.7 10.2 L9.4 12 L11.2 12.7 L9.4 13.4 L8.7 15.2 L8 13.4 L6.2 12.7 Z" fill="#00A99D" fillOpacity="0.7" />
+                    </g>
+                    <g>
+                      <animate attributeName="opacity" values="0;1;0" dur="1.8s" repeatCount="indefinite" begin="1s" />
+                      <path d="M40 27 L40.6 25.5 L41.2 27 L42.7 27.6 L41.2 28.2 L40.6 29.7 L40 28.2 L38.5 27.6 Z" fill="#00A99D" fillOpacity="0.6" />
+                    </g>
+                    <g>
+                      <animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite" begin="0.3s" />
+                      <path d="M24 3 L24.5 1.7 L25 3 L26.3 3.5 L25 4 L24.5 5.3 L24 4 L22.7 3.5 Z" fill="#00A99D" fillOpacity="0.75" />
+                    </g>
+
+                    {/* Trophy cup */}
+                    <path d="M14 8 H34 V23 C34 31 14 31 14 23 Z" fill="#187A72" />
+                    <path d="M14 8 H34 V15 C34 15 24 17 14 15 Z" fill="#00A99D" fillOpacity="0.3" />
+
+                    {/* Shine sweep */}
+                    <g clipPath="url(#trophyCupClip)">
+                      <rect y="0" width="10" height="48" fill="white" fillOpacity="0.18" transform="rotate(-20 24 20)">
+                        <animate attributeName="x" values="-30;60" dur="3s" repeatCount="indefinite" begin="1s" />
+                      </rect>
+                    </g>
+
+                    {/* Handles */}
+                    <path d="M14 12 C9 12 7 17 7 20 C7 24 10 26 14 25" stroke="#187A72" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                    <path d="M34 12 C39 12 41 17 41 20 C41 24 38 26 34 25" stroke="#187A72" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+
+                    {/* Spinning star inside */}
+                    <g>
+                      <animateTransform attributeName="transform" type="rotate" from="0 24 19" to="360 24 19" dur="4s" repeatCount="indefinite" />
+                      <path d="M24 14 L25.2 18 L29.5 18 L26 20.5 L27.4 24.5 L24 22 L20.6 24.5 L22 20.5 L18.5 18 L22.8 18 Z" fill="#00A99D" fillOpacity="0.85" />
+                    </g>
+
+                    {/* Stem */}
+                    <rect x="21" y="31" width="6" height="7" fill="#187A72" />
+                    {/* Base */}
+                    <rect x="14" y="38" width="20" height="4" rx="2" fill="#187A72" />
+                    <rect x="14" y="38" width="20" height="2" rx="1" fill="#00A99D" fillOpacity="0.3" />
                   </svg>
                 ),
                 title: 'Compete Globally',
@@ -213,19 +337,58 @@ function HomePage() {
               {
                 icon: (
                   <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                    <path d="M24 4 L28 16 L40 16 L30 24 L34 36 L24 28 L14 36 L18 24 L8 16 L20 16 Z" stroke="#187A72" strokeWidth="2" fill="none" strokeLinejoin="round" />
-                    <circle cx="24" cy="22" r="4" stroke="#00A99D" strokeWidth="2" />
+                    {/* Stars */}
+                    <circle cx="7" cy="9" r="1.2" fill="#00A99D" fillOpacity="0.5" />
+                    <circle cx="41" cy="7" r="0.9" fill="#00A99D" fillOpacity="0.5" />
+                    <circle cx="5" cy="22" r="0.8" fill="#00A99D" fillOpacity="0.4" />
+                    <circle cx="43" cy="18" r="1.2" fill="#00A99D" fillOpacity="0.45" />
+                    {/* Rocket body */}
+                    <path d="M24 3 C24 3 32 11 32 22 L24 26 L16 22 C16 11 24 3 24 3Z" fill="#187A72" />
+                    <path d="M24 3 C24 3 29 10 29 19 L24 21 L19 19 C19 10 24 3 24 3Z" fill="#00A99D" fillOpacity="0.28" />
+                    {/* Porthole */}
+                    <circle cx="24" cy="16" r="4" fill="#0a3d38" />
+                    <circle cx="24" cy="16" r="2.5" fill="#1a8a82" />
+                    <circle cx="23" cy="15" r="1" fill="white" fillOpacity="0.45" />
+                    {/* Left fin */}
+                    <path d="M16 22 L10 30 L16 28 Z" fill="#0d5c55" />
+                    {/* Right fin */}
+                    <path d="M32 22 L38 30 L32 28 Z" fill="#0d5c55" />
+                    {/* Flame outer */}
+                    <path d="M19 26 C17 31 18 35 24 37 C30 35 31 31 29 26 L24 28 Z" fill="#00A99D" fillOpacity="0.9" />
+                    {/* Flame inner */}
+                    <path d="M21 27 C20 31 21 34 24 35.5 C27 34 28 31 27 27 L24 29 Z" fill="white" fillOpacity="0.28" />
+                    {/* Animated thrust lines */}
+                    <line x1="24" y1="37" x2="24" y2="45" stroke="#00A99D" strokeWidth="2" strokeLinecap="round">
+                      <animate attributeName="opacity" values="1;0.15;1" dur="0.55s" repeatCount="indefinite" />
+                      <animate attributeName="y2" values="45;42;45" dur="0.55s" repeatCount="indefinite" />
+                    </line>
+                    <line x1="20" y1="36" x2="19" y2="43" stroke="#00A99D" strokeWidth="1.5" strokeLinecap="round">
+                      <animate attributeName="opacity" values="0.75;0.1;0.75" dur="0.55s" begin="0.1s" repeatCount="indefinite" />
+                      <animate attributeName="y2" values="43;40;43" dur="0.55s" begin="0.1s" repeatCount="indefinite" />
+                    </line>
+                    <line x1="28" y1="36" x2="29" y2="43" stroke="#00A99D" strokeWidth="1.5" strokeLinecap="round">
+                      <animate attributeName="opacity" values="0.75;0.1;0.75" dur="0.55s" begin="0.2s" repeatCount="indefinite" />
+                      <animate attributeName="y2" values="43;40;43" dur="0.55s" begin="0.2s" repeatCount="indefinite" />
+                    </line>
+                    <line x1="17" y1="34" x2="15" y2="40" stroke="#00A99D" strokeWidth="1" strokeLinecap="round">
+                      <animate attributeName="opacity" values="0.4;0.05;0.4" dur="0.5s" begin="0.05s" repeatCount="indefinite" />
+                      <animate attributeName="y2" values="40;37;40" dur="0.5s" begin="0.05s" repeatCount="indefinite" />
+                    </line>
+                    <line x1="31" y1="34" x2="33" y2="40" stroke="#00A99D" strokeWidth="1" strokeLinecap="round">
+                      <animate attributeName="opacity" values="0.4;0.05;0.4" dur="0.5s" begin="0.28s" repeatCount="indefinite" />
+                      <animate attributeName="y2" values="40;37;40" dur="0.5s" begin="0.28s" repeatCount="indefinite" />
+                    </line>
                   </svg>
                 ),
                 title: 'Grow & Inspire',
-                description: 'We cultivate hands-on engineering experience across mechanical, electrical, and software disciplines — helping students go from classroom concepts to real-world solutions.',
+                description: 'We cultivate hands-on engineering experience across mechanical, electrical, and software disciplines, helping students go from classroom concepts to real-world solutions.',
               },
             ].map((item) => (
               <div
                 key={item.title}
                 className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
               >
-                <div className="mb-5">{item.icon}</div>
+                <div className={`mb-5 inline-block ${item.title === 'Grow & Inspire' && rocketFired ? 'rocket-launch' : ''} ${item.title === 'Design & Build' && rocketFired ? 'rov-bob' : ''} ${item.title === 'Compete Globally' && rocketFired ? 'trophy-bounce' : ''}`}>{item.icon}</div>
                 <h3 className="text-xl font-bold mb-3" style={{ color: '#187A72' }}>{item.title}</h3>
                 <p className="text-gray-600 leading-relaxed">{item.description}</p>
               </div>
@@ -303,19 +466,8 @@ function HomePage() {
               <h3 className="text-4xl font-bold mb-4 text-gray-900">Join Us</h3>
               <div className="w-12 h-0.5 rounded-full mb-8" style={{ backgroundColor: '#00A99D' }} />
               <p className="text-lg text-gray-600 leading-relaxed mb-10 flex-1">
-                Interested in experiencing what it means to be part of the Kelpie Robotics team?
-                We are always looking for passionate students who are eager to learn and make an impact
-                in underwater robotics.
+                We recruit every fall, with occasional winter openings depending on the year. If you are passionate, hands-on, and ready to build something real, there is a place for you on this team.
               </p>
-              <div>
-                <Link
-                  href="/contact-us"
-                  className="inline-block px-8 py-3 rounded-full font-semibold text-white transition-all hover:shadow-lg hover:scale-105"
-                  style={{ backgroundColor: '#187A72' }}
-                >
-                  Join Our Team
-                </Link>
-              </div>
             </div>
 
             {/* Support Us */}

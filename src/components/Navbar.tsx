@@ -71,7 +71,7 @@ function Navbar() {
           <Image src="/assets/branding/Copy of logo_color.svg" alt="Kelpie Robotics" width={80} height={80} />
         </Link>
 
-        {/* Desktop nav */}
+        {/* Desktop nav (centered via spacer on right) */}
         <nav ref={dropdownRef} className="hidden md:flex items-center gap-7">
           {NAV_ITEMS.map((item) => {
             const active = isActive(item.url, item.children);
@@ -147,17 +147,9 @@ function Navbar() {
           })}
         </nav>
 
-        {/* Right side: CTA + socials */}
-        <div className="hidden md:flex items-center gap-4">
-          <Link
-            href="/contact-us"
-            className="px-5 py-2.5 rounded-full text-sm font-semibold text-white transition-all hover:shadow-md hover:scale-105"
-            style={{ backgroundColor: '#00A99D' }}
-          >
-            Join Our Team
-          </Link>
 
-        </div>
+        {/* Spacer to balance logo and keep nav centered */}
+        <div className="hidden md:block" style={{ width: 80 }} />
 
         {/* Mobile hamburger */}
         <button
@@ -240,17 +232,6 @@ function Navbar() {
               })}
             </nav>
 
-            {/* Bottom: CTA */}
-            <div className="px-6 py-8 border-t border-gray-100">
-              <Link
-                href="/contact-us"
-                onClick={() => setMenuOpen(false)}
-                className="w-full text-center px-6 py-3.5 rounded-full font-semibold text-white text-base transition-all hover:shadow-md block"
-                style={{ backgroundColor: '#00A99D' }}
-              >
-                Join Our Team
-              </Link>
-            </div>
 
           </div>
         </div>
